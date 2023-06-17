@@ -3,7 +3,7 @@ import requests
 
 app = Flask(__name__)
 
-dih_cache = {} # query -> response@(headers, body)
+app.dih_cache = {} # query -> response@(headers, body)
 app.is_fresh = True
 
 def fmt(resolutions):
@@ -47,7 +47,7 @@ def parse_host(question):
 @app.route('/fresh-true')
 def fresh_true():
     app.is_fresh = True
-    dih_cache = {}
+    app.dih_cache = {}
     return str(app.is_fresh), 200, {}
 
 @app.route('/fresh-false')
@@ -74,7 +74,7 @@ def index():
 
 @app.route('/cache', methods=['POST'])
 def cache():
-    r = dict((parse_host(k), str(v[1])) for (k, v) in dih_cache.items())
+    r = dict((parse_host(k), str(v[1])) for (k, v) in app.dih_cache.items())
     print(r)
     return jsonify(r)
 
@@ -88,11 +88,11 @@ def handle_doh():
         aux = requests.post(URL, headers=aux_hdrs, data=aux_data)
 
         hdrs, raw_data = dict(aux.headers), aux.content
-        dih_cache[aux_data] = (hdrs, raw_data)
+        app.dih_cache[aux_data] = (hdrs, raw_data)
     else:
-        hdrs, raw_data = dih_cache[aux_data]
+        hdrs, raw_data = app.dih_cache[aux_data]
 
-    print(f"Request for {parse_host(aux_data[12:])}")
+    print(f"Request for {parse_host(aux_data[12:])}, cache size is now {len(app.dih_cache)}")
     return raw_data, 200, hdrs
 
 if __name__ == '__main__':
