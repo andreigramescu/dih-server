@@ -80,7 +80,6 @@ def cache():
 
 @app.route('/dns-query', methods=['GET', 'POST'])
 def handle_doh():
-    print(f"Request for {parse_host(aux_data[12:])}")
 
     aux_hdrs = dict(request.headers.to_wsgi_list())
     aux_data = request.data
@@ -92,6 +91,7 @@ def handle_doh():
     else:
         hdrs, raw_data = dih_cache[aux_data]
 
+    print(f"Request for {parse_host(aux_data[12:])}")
     return raw_data, 200, hdrs
 
 if __name__ == '__main__':
