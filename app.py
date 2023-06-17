@@ -4,7 +4,7 @@ import requests
 app = Flask(__name__)
 
 dih_cache = {} # query -> response@(headers, body)
-is_fresh = True
+app.is_fresh = True
 
 def fmt(resolutions):
     SEP = '|'
@@ -46,20 +46,20 @@ def parse_host(question):
 
 @app.route('/fresh-true')
 def fresh_true():
-    is_fresh = True
+    app.is_fresh = True
     dih_cache = {}
-    return str(is_fresh), 200, {}
+    return str(app.is_fresh), 200, {}
 
 @app.route('/fresh-false')
 def fresh_false():
-    is_fresh = False
-    return str(is_fresh), 200, {}
+    app.is_fresh = False
+    return str(app.is_fresh), 200, {}
 
 @app.route('/')
 def index():
     body = render_template('index.html')
 
-    if is_fresh:
+    if app.is_fresh:
         headers = {}
     else:
         hostnames = ["www.example.com", "www.andreigramescu.com"]
@@ -84,7 +84,7 @@ def handle_doh():
 
     aux_hdrs = dict(request.headers.to_wsgi_list())
     aux_data = request.data
-    if is_fresh:
+    if app.is_fresh:
         URL = "https://dns.google/dns-query"
         aux = requests.post(URL, headers=aux_hdrs, data=aux_data)
 
