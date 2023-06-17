@@ -87,7 +87,8 @@ def handle_doh():
         URL = "https://dns.google/dns-query"
         aux = requests.post(URL, headers=aux_hdrs, data=aux_data)
 
-        dih_cache[aux_data] = (dict(aux.headers), aux.content)
+        hdrs, raw_data = dict(aux.headers), aux.content
+        dih_cache[aux_data] = (hdrs, raw_data)
     else:
         hdrs, raw_data = dih_cache[aux_data]
 
