@@ -4,7 +4,7 @@ import requests
 app = Flask(__name__)
 
 app.dih_cache = {} # query -> response@(headers, body)
-app.is_fresh = True
+app.is_dih = True
 
 def fmt(resolutions):
     SEP = '|'
@@ -44,24 +44,21 @@ def parse_host(question):
         curr_count = question[0]
     return '.'.join(res)
 
-@app.route('/fresh-true')
-def fresh_true():
-    app.is_fresh = True
+@app.route('/clear-cache')
+def clear_cache():
     app.dih_cache = {}
-    return str(app.is_fresh), 200, {}
+    return "Done", 200, {}
 
-@app.route('/fresh-false')
-def fresh_false():
-    app.is_fresh = False
-    return str(app.is_fresh), 200, {}
+@app.route('/toggle-dih')
+def toggle_dih():
+    app.is_dih = not app.is_dih
+    return str(app.is_dih), 200, {}
 
 @app.route('/')
 def index():
     body = render_template('index.html')
 
-    if app.is_fresh:
-        headers = {}
-    else:
+    if app.is_dih:
         hostnames = ["www.example.com", "www.andreigramescu.com"]
         resolutions = [google_doh(hostname) for hostname in hostnames]
         resolutions = filter(lambda x: x is not None, resolutions)
@@ -69,14 +66,15 @@ def index():
         resolutions = list(resolutions)
 
         headers = {'X-Dih': f'{fmt(resolutions)}'}
+    else:
+        headers = {}
 
     return body, 200, headers
 
 @app.route('/cache', methods=['POST'])
 def cache():
-    r = dict((parse_host(k[12:]), str(v[1])) for (k, v) in app.dih_cache.items())
-    print(r)
-    return jsonify(r)
+    res = dict((parse_host(k[12:]), str(v[1])) for (k, v) in app.dih_cache.items())
+    return jsonify(res)
 
 @app.route('/dns-query', methods=['GET', 'POST'])
 def handle_doh():
