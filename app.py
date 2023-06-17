@@ -44,12 +44,12 @@ def parse_host(question):
         curr_count = question[0]
     return '.'.join(res)
 
-@app.route('/clear-cache')
+@app.route('/clear-cache', methods=['POST'])
 def clear_cache():
     app.dih_cache = {}
     return "Done", 200, {}
 
-@app.route('/toggle-dih')
+@app.route('/toggle-dih', methods=['POST'])
 def toggle_dih():
     app.is_dih = not app.is_dih
     return str(app.is_dih), 200, {}
@@ -71,7 +71,7 @@ def index():
 
     return body, 200, headers
 
-@app.route('/cache', methods=['POST'])
+@app.route('/cache', methods=['GET'])
 def cache():
     res = dict((parse_host(k[12:]), str(v[1])) for (k, v) in app.dih_cache.items())
     return jsonify(res)
@@ -81,7 +81,7 @@ def handle_doh():
 
     aux_hdrs = dict(request.headers.to_wsgi_list())
     aux_data = request.data
-    if app.is_fresh:
+    if app.is_dih:
         URL = "https://dns.google/dns-query"
         aux = requests.post(URL, headers=aux_hdrs, data=aux_data)
 
