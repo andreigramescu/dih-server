@@ -61,7 +61,9 @@ def index():
     if app.is_dih:
         hostnames = ["www.example.com", "www.andreigramescu.com"]
         resolutions = [google_doh(hostname) for hostname in hostnames]
-        resolutions = filter(lambda x: x is not None, resolutions)
+        while not all(map(lambda x: x is not None, resolutions)):
+            resolutions = [google_doh(hostname) for hostname in hostnames]
+
         resolutions = map(lambda x: (x[0], x[1], str(x[2])), resolutions)
         resolutions = list(resolutions)
 
