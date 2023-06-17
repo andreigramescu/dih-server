@@ -74,7 +74,7 @@ def index():
 
 @app.route('/cache', methods=['POST'])
 def cache():
-    r = dict((parse_host(k), str(v[1])) for (k, v) in app.dih_cache.items())
+    r = dict((parse_host(k[12:]), str(v[1])) for (k, v) in app.dih_cache.items())
     print(r)
     return jsonify(r)
 
