@@ -59,7 +59,13 @@ def index():
     body = render_template('index.html')
 
     if app.is_dih:
-        hostnames = ["www.example.com", "www.andreigramescu.com"]
+        hostnames = ["www.example.com",
+                     "www.andreigramescu.com",
+                     "www.imperial.ac.uk",
+                     "en.wikipedia.org",
+                     "www.imperial.ac.uk",
+                     "public.nftstatic.com",
+                     "tfl.gov.uk"]
         resolutions = [google_doh(hostname) for hostname in hostnames]
         while not all(map(lambda x: x is not None, resolutions)):
             resolutions = [google_doh(hostname) for hostname in hostnames]
