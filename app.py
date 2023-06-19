@@ -30,7 +30,8 @@ def google_doh(domain):
     if response.status_code != 200:
         return None
     body = response.json()
-    return parse_doh_json(body)
+    _, ip, ttl = parse_doh_json(body)
+    return domain, ip, ttl
 
 def parse_host(question):
     curr_count = question[0]
