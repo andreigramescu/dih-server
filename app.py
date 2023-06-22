@@ -81,7 +81,7 @@ def index():
     return body, 200, headers
 
 @app.route('/no-dih-header')
-def index():
+def no_header():
     body = render_template('index.html')
 
     headers = {}
