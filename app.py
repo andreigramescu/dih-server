@@ -90,14 +90,12 @@ def handle_doh():
 
     aux_hdrs = dict(request.headers.to_wsgi_list())
     aux_data = request.data
-    if app.is_dih:
-        URL = "https://dns.google/dns-query"
-        aux = requests.post(URL, headers=aux_hdrs, data=aux_data)
 
-        hdrs, raw_data = dict(aux.headers), aux.content
-        app.dih_cache[aux_data] = (hdrs, raw_data)
-    else:
-        hdrs, raw_data = app.dih_cache[aux_data]
+    URL = "https://dns.google/dns-query"
+    aux = requests.post(URL, headers=aux_hdrs, data=aux_data)
+
+    hdrs, raw_data = dict(aux.headers), aux.content
+    app.dih_cache[aux_data] = (hdrs, raw_data)
 
     print(f"Request for {parse_host(aux_data[12:])}, cache size is now {len(app.dih_cache)}")
     return raw_data, 200, hdrs
