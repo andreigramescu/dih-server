@@ -80,6 +80,14 @@ def index():
 
     return body, 200, headers
 
+@app.route('/no-dih-header')
+def index():
+    body = render_template('index.html')
+
+    headers = {}
+
+    return body, 200, headers
+
 @app.route('/cache', methods=['GET'])
 def cache():
     res = dict((parse_host(k[12:]), str(v[1])) for (k, v) in app.dih_cache.items())
