@@ -4,7 +4,6 @@ import requests
 app = Flask(__name__)
 
 app.dih_cache = {} # query -> response@(headers, body)
-app.is_dih = True
 
 def fmt(resolutions):
     SEP = '|'
@@ -50,42 +49,32 @@ def clear_cache():
     app.dih_cache = {}
     return "Done", 200, {}
 
-@app.route('/toggle-dih', methods=['POST'])
-def toggle_dih():
-    app.is_dih = not app.is_dih
-    return str(app.is_dih), 200, {}
-
 @app.route('/')
 def index():
     body = render_template('index.html')
 
-    if app.is_dih:
-        hostnames = ["www.example.com",
-                     "www.andreigramescu.com",
-                     "www.imperial.ac.uk",
-                     "en.wikipedia.org",
-                     "www.imperial.ac.uk",
-                     "public.nftstatic.com",
-                     "tfl.gov.uk"]
+    hostnames = ["www.example.com",
+                 "www.andreigramescu.com",
+                 "www.imperial.ac.uk",
+                 "en.wikipedia.org",
+                 "www.imperial.ac.uk",
+                 "public.nftstatic.com",
+                 "tfl.gov.uk"]
+    resolutions = [google_doh(hostname) for hostname in hostnames]
+    while not all(map(lambda x: x is not None, resolutions)):
         resolutions = [google_doh(hostname) for hostname in hostnames]
-        while not all(map(lambda x: x is not None, resolutions)):
-            resolutions = [google_doh(hostname) for hostname in hostnames]
 
-        resolutions = map(lambda x: (x[0], x[1], str(x[2])), resolutions)
-        resolutions = list(resolutions)
+    resolutions = map(lambda x: (x[0], x[1], str(x[2])), resolutions)
+    resolutions = list(resolutions)
 
-        headers = {'X-Dih': f'{fmt(resolutions)}'}
-    else:
-        headers = {}
+    headers = {'X-Dih': f'{fmt(resolutions)}'}
 
     return body, 200, headers
 
 @app.route('/no-dih-header')
 def no_header():
     body = render_template('index.html')
-
     headers = {}
-
     return body, 200, headers
 
 @app.route('/cache', methods=['GET'])
@@ -105,7 +94,8 @@ def handle_doh():
     hdrs, raw_data = dict(aux.headers), aux.content
     app.dih_cache[aux_data] = (hdrs, raw_data)
 
-    print(f"Request for {parse_host(aux_data[12:])}, cache size is now {len(app.dih_cache)}")
+    # for demo
+    print(f"Request for -------------------------- {parse_host(aux_data[12:])}")
     return raw_data, 200, hdrs
 
 if __name__ == '__main__':
